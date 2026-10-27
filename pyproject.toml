@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spotex-pay"
+version = "0.1.0"
+description = "Python client for the SpotEx Pay merchant API: checkouts, checkout sessions, payouts and webhook verification."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+dependencies = []
+keywords = ["spotex", "crypto", "payments", "bitcoin", "dogecoin", "merchant", "checkout", "webhooks"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Office/Business :: Financial :: Point-Of-Sale",
+]
+
+[project.urls]
+Homepage = "https://spotex.trade/merchants"
+Documentation = "https://spotex.trade/docs/merchant"
+Source = "https://github.com/SpotEx-trade/spotex-pay-python"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+spotex_pay = ["py.typed"]
