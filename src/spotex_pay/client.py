@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 from .errors import SpotExPayError
 
 DEFAULT_BASE_URL = "https://spotex.trade/api/merchant/v1"
-_VERSION = "0.2.0"
+_VERSION = "0.3.0"
 
 
 class SpotExPay:
@@ -31,6 +31,8 @@ class SpotExPay:
         self.checkout_sessions = _CheckoutSessions(self)
         self.checkouts = _Checkouts(self)
         self.invoices = _Invoices(self)
+        self.plans = _Plans(self)
+        self.subscriptions = _Subscriptions(self)
         self.coins = _Coins(self)
         self.balance = _Balance(self)
         self.payouts = _Payouts(self)
@@ -129,6 +131,37 @@ class _Checkouts:
     def simulate(self, checkout_id: str, outcome: str) -> Dict[str, Any]:
         """Test mode only: "paid", "partial" or "expired"."""
         return self._c._post(f"/checkouts/{_q(checkout_id)}/simulate", {"outcome": outcome})
+
+
+class _Plans:
+    """Live keys only. A plan's price and interval never change: a new price is a new plan."""
+
+    def __init__(self, client: SpotExPay) -> None:
+        self._c = client
+
+    def create(self, name: str, price: str, currency: str, interval: str) -> Dict[str, Any]:
+        """interval: "week", "month" or "year". Send SpotEx users the plan's ``url`` to subscribe."""
+        return self._c._post("/plans", {"name": name, "price": price, "currency": currency, "interval": interval})
+
+    def list(self) -> Dict[str, Any]:
+        return self._c._get("/plans")
+
+
+class _Subscriptions:
+    """Live keys only."""
+
+    def __init__(self, client: SpotExPay) -> None:
+        self._c = client
+
+    def retrieve(self, subscription_id: str) -> Dict[str, Any]:
+        return self._c._get(f"/subscriptions/{_q(subscription_id)}")
+
+    def list(self, status: Optional[str] = None, limit: Optional[int] = None, before: Optional[str] = None) -> Dict[str, Any]:
+        return self._c._get("/subscriptions", {"status": status, "limit": limit, "before": before})
+
+    def cancel(self, subscription_id: str) -> Dict[str, Any]:
+        """No more charges; periods paid stay paid."""
+        return self._c._post(f"/subscriptions/{_q(subscription_id)}/cancel", {})
 
 
 class _Invoices:

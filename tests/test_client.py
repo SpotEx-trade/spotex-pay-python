@@ -105,6 +105,26 @@ class ClientTest(unittest.TestCase):
         finally:
             api.close()
 
+    def test_plans_and_subscriptions(self):
+        api = MockApi(200, {"id": "x"})
+        try:
+            spotex = SpotExPay("sk_live_abc", base_url=api.base_url)
+            spotex.plans.create("Monthly box", "9.99", "EUR", "month")
+            spotex.plans.list()
+            spotex.subscriptions.list(status="active", limit=10)
+            spotex.subscriptions.retrieve("sub1")
+            spotex.subscriptions.cancel("sub1")
+            self.assertEqual([(r["method"], r["path"]) for r in api.seen], [
+                ("POST", "/api/merchant/v1/plans"),
+                ("GET", "/api/merchant/v1/plans"),
+                ("GET", "/api/merchant/v1/subscriptions?status=active&limit=10"),
+                ("GET", "/api/merchant/v1/subscriptions/sub1"),
+                ("POST", "/api/merchant/v1/subscriptions/sub1/cancel"),
+            ])
+            self.assertEqual(api.seen[0]["body"], {"name": "Monthly box", "price": "9.99", "currency": "EUR", "interval": "month"})
+        finally:
+            api.close()
+
     def test_idempotency_key_made_for_posts_only(self):
         api = MockApi(200, {"data": []})
         try:

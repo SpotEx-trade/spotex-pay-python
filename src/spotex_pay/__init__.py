@@ -12,7 +12,7 @@ from .client import DEFAULT_BASE_URL, SpotExPay
 from .errors import SignatureVerificationError, SpotExPayError
 from .webhook import construct_event, sign_payload, verify_signature
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "DEFAULT_BASE_URL",

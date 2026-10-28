@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0 (2026-10-28)
+
+- `plans.create` and `plans.list`; `subscriptions.list`, `retrieve` and `cancel`: recurring payments from SpotEx balances.
+- Checkouts carry `subscription_id` and `subscription_period`.
+
 ## 0.2.0 (2026-10-28)
 
 - Prices in your own currency: `price=` with `currency=` (EUR, GBP, JPY and others) when creating checkout sessions and checkouts. `amount_usd` still works for dollars, positionally too.
