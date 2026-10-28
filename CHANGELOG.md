@@ -2,6 +2,7 @@
 
 ## 0.3.0 (2026-10-28)
 
+- `checkout.released` and status `released`: a part payment SpotEx passed to your wallet without you accepting it (after it waited too long, or by support). The order is not paid; never fulfil on it. Checkouts carry `accepted_by`.
 - `plans.create` and `plans.list`; `subscriptions.list`, `retrieve` and `cancel`: recurring payments from SpotEx balances.
 - Checkouts carry `subscription_id` and `subscription_period`.
 - USDT and other tokens on EVM chains: `checkouts.create` takes `network`, checkouts carry it, and each coin lists its `networks`.
