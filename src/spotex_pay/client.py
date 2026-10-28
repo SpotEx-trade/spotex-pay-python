@@ -114,12 +114,13 @@ class _Checkouts:
 
     def create(self, amount_usd: Optional[str] = None, coin: Optional[str] = None, item: Optional[str] = None,
                order_id: Optional[str] = None, idempotency_key: Optional[str] = None,
-               *, price: Optional[str] = None, currency: Optional[str] = None) -> Dict[str, Any]:
+               *, price: Optional[str] = None, currency: Optional[str] = None, network: Optional[str] = None) -> Dict[str, Any]:
         """An on-chain checkout with its own address and exact amount, to show in your own design.
 
-        Price it with ``price`` and ``currency``, or ``amount_usd`` for dollars.
+        Price it with ``price`` and ``currency``, or ``amount_usd`` for dollars. A token on
+        several chains, like USDT, takes ``network``: one of its ``networks`` in ``coins.list()``.
         """
-        body = {"price": price, "currency": currency, "amount_usd": amount_usd, "coin": coin, "item": item, "order_id": order_id}
+        body = {"price": price, "currency": currency, "amount_usd": amount_usd, "coin": coin, "network": network, "item": item, "order_id": order_id}
         return self._c._post("/checkouts", body, idempotency_key)
 
     def retrieve(self, checkout_id: str) -> Dict[str, Any]:

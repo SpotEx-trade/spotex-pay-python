@@ -4,6 +4,7 @@
 
 - `plans.create` and `plans.list`; `subscriptions.list`, `retrieve` and `cancel`: recurring payments from SpotEx balances.
 - Checkouts carry `subscription_id` and `subscription_period`.
+- USDT and other tokens on EVM chains: `checkouts.create` takes `network`, checkouts carry it, and each coin lists its `networks`.
 
 ## 0.2.0 (2026-10-28)
 
