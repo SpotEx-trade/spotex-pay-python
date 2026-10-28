@@ -4,7 +4,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import uuid
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from .errors import SpotExPayError
 
@@ -30,6 +30,7 @@ class SpotExPay:
         self.timeout = timeout
         self.checkout_sessions = _CheckoutSessions(self)
         self.checkouts = _Checkouts(self)
+        self.invoices = _Invoices(self)
         self.coins = _Coins(self)
         self.balance = _Balance(self)
         self.payouts = _Payouts(self)
@@ -128,6 +129,35 @@ class _Checkouts:
     def simulate(self, checkout_id: str, outcome: str) -> Dict[str, Any]:
         """Test mode only: "paid", "partial" or "expired"."""
         return self._c._post(f"/checkouts/{_q(checkout_id)}/simulate", {"outcome": outcome})
+
+
+class _Invoices:
+    """Live keys only."""
+
+    def __init__(self, client: SpotExPay) -> None:
+        self._c = client
+
+    def create(self, currency: str, items: List[Dict[str, Any]], title: Optional[str] = None, customer_name: Optional[str] = None,
+               customer_email: Optional[str] = None, memo: Optional[str] = None, due_date: Optional[str] = None,
+               idempotency_key: Optional[str] = None) -> Dict[str, Any]:
+        """An invoice with a page of its own: send your customer its ``url``.
+
+        ``items`` is 1 to 50 of ``{"description", "quantity" (default "1"), "unit_price"}``;
+        ``due_date`` is YYYY-MM-DD.
+        """
+        body = {"currency": currency, "items": items, "title": title, "customer_name": customer_name,
+                "customer_email": customer_email, "memo": memo, "due_date": due_date}
+        return self._c._post("/invoices", body, idempotency_key)
+
+    def retrieve(self, invoice_id: str) -> Dict[str, Any]:
+        return self._c._get(f"/invoices/{_q(invoice_id)}")
+
+    def list(self, limit: Optional[int] = None, before: Optional[str] = None) -> Dict[str, Any]:
+        return self._c._get("/invoices", {"limit": limit, "before": before})
+
+    def void(self, invoice_id: str) -> Dict[str, Any]:
+        """Cancel an unpaid invoice: its page stops taking payments."""
+        return self._c._post(f"/invoices/{_q(invoice_id)}/void", {})
 
 
 class _Coins:

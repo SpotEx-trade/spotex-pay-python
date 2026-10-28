@@ -85,6 +85,26 @@ class ClientTest(unittest.TestCase):
         finally:
             api.close()
 
+    def test_invoices(self):
+        api = MockApi(200, {"id": "inv1", "object": "invoice", "url": "https://spotex.trade/invoice/inv1"})
+        try:
+            spotex = SpotExPay("sk_live_abc", base_url=api.base_url)
+            made = spotex.invoices.create("EUR", [{"description": "Logo", "unit_price": "300"}], due_date="2026-11-30", idempotency_key="invoice-2041")
+            self.assertEqual(made["url"], "https://spotex.trade/invoice/inv1")
+            spotex.invoices.retrieve("inv1")
+            spotex.invoices.list(limit=5)
+            spotex.invoices.void("inv1")
+            self.assertEqual([(r["method"], r["path"]) for r in api.seen], [
+                ("POST", "/api/merchant/v1/invoices"),
+                ("GET", "/api/merchant/v1/invoices/inv1"),
+                ("GET", "/api/merchant/v1/invoices?limit=5"),
+                ("POST", "/api/merchant/v1/invoices/inv1/void"),
+            ])
+            self.assertEqual(api.seen[0]["body"], {"currency": "EUR", "items": [{"description": "Logo", "unit_price": "300"}], "due_date": "2026-11-30"})
+            self.assertEqual(api.seen[0]["headers"]["Idempotency-Key"], "invoice-2041")
+        finally:
+            api.close()
+
     def test_idempotency_key_made_for_posts_only(self):
         api = MockApi(200, {"data": []})
         try:

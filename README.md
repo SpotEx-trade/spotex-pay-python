@@ -56,6 +56,22 @@ checkout = spotex.checkouts.create(price="25.00", currency="EUR", coin="DOGE", i
 
 `spotex.coins.list()` says which coins you accept and which can be sent from any wallet (`"onchain": True`).
 
+## Invoices
+
+```python
+invoice = spotex.invoices.create(
+    currency="EUR",
+    customer_name="Acme Ltd",
+    items=[
+        {"description": "Logo design", "unit_price": "300"},
+        {"description": "Revisions, hours", "quantity": "2.5", "unit_price": "40"},
+    ],
+    due_date="2026-11-30",
+    idempotency_key="invoice-2041",
+)
+# send your customer invoice["url"]; checkout.paid arrives with invoice_id when they pay
+```
+
 ## Webhooks
 
 Check the signature against the **raw** body before trusting anything in it:

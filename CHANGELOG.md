@@ -4,6 +4,7 @@
 
 - Prices in your own currency: `price=` with `currency=` (EUR, GBP, JPY and others) when creating checkout sessions and checkouts. `amount_usd` still works for dollars, positionally too.
 - Checkouts carry `price`, `currency` and `currency_rate_usd`; checkout sessions carry `price` and `currency`, with `amount_usd` None for a price not in dollars.
+- `invoices.create`, `retrieve`, `list` and `void`: invoices with lines, a due date and a page of their own. Checkouts carry `invoice_id`.
 
 ## 0.1.1 (2026-10-28)
 
