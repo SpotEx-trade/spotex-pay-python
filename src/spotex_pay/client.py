@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 from .errors import SpotExPayError
 
 DEFAULT_BASE_URL = "https://spotex.trade/api/merchant/v1"
-_VERSION = "0.1.0"
+_VERSION = "0.1.1"
 
 
 class SpotExPay:

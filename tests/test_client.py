@@ -1,4 +1,7 @@
+import hashlib
+import hmac
 import json
+import os
 import threading
 import time
 import unittest
@@ -152,6 +155,19 @@ class WebhookTest(unittest.TestCase):
             construct_event(BODY, "t=1793071234,v1=ü", SECRET, tolerance_seconds=0)
         fresh = sign_payload(BODY.encode(), SECRET, int(time.time()))
         self.assertTrue(verify_signature(BODY.encode(), fresh, SECRET))
+
+    def test_no_secret(self):
+        # Signed with an empty key, as an attacker could when the secret is empty.
+        digest = hmac.new(b"", b"1793071234." + BODY.encode(), hashlib.sha256).hexdigest()
+        forged = "t=1793071234,v1=" + digest
+        with self.assertRaisesRegex(TypeError, "no webhook signing secret"):
+            construct_event(BODY, forged, "", tolerance_seconds=0)
+        with self.assertRaises(TypeError):
+            verify_signature(BODY, forged, "", tolerance_seconds=0)
+        with self.assertRaises(TypeError):
+            verify_signature(BODY, forged, os.environ.get("SPOTEX_NO_SUCH_VARIABLE"), tolerance_seconds=0)
+        with self.assertRaises(TypeError):
+            sign_payload(BODY, "")
 
 
 if __name__ == "__main__":

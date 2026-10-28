@@ -7,6 +7,16 @@ from typing import Any, Dict, Optional, Union
 from .errors import SignatureVerificationError
 
 
+def _require_secret(secret: Any) -> None:
+    # An empty key would accept a body anyone can sign, as happens when the
+    # secret's environment variable is set but empty: refuse it outright.
+    if not isinstance(secret, str) or not secret:
+        raise TypeError(
+            "SpotEx Pay: no webhook signing secret. Pass the whsec_... secret from the Merchant Center "
+            "(is SPOTEX_WEBHOOK_SECRET set?)."
+        )
+
+
 def construct_event(
     raw_body: Union[bytes, str],
     signature_header: Optional[str],
@@ -19,6 +29,7 @@ def construct_event(
     Raises SignatureVerificationError if it does not match, or if it is older
     than ``tolerance_seconds`` (a replay). Pass 0 to skip the age check.
     """
+    _require_secret(secret)
     if not signature_header:
         raise SignatureVerificationError("No SpotEx-Signature header.")
     parts: Dict[str, str] = {}
@@ -49,6 +60,7 @@ def verify_signature(
     tolerance_seconds: int = 300,
 ) -> bool:
     """True when the signature checks out; construct_event says why when it does not."""
+    _require_secret(secret)
     try:
         construct_event(raw_body, signature_header, secret, tolerance_seconds)
         return True
@@ -58,6 +70,7 @@ def verify_signature(
 
 def sign_payload(body: Union[bytes, str], secret: str, unix: Optional[int] = None) -> str:
     """Sign a body as SpotEx does: for your own tests of a webhook handler."""
+    _require_secret(secret)
     t = int(time.time()) if unix is None else unix
     data = body if isinstance(body, bytes) else body.encode("utf-8")
     digest = hmac.new(secret.encode("utf-8"), str(t).encode("ascii") + b"." + data, hashlib.sha256).hexdigest()
