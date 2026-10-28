@@ -72,6 +72,19 @@ class ClientTest(unittest.TestCase):
         finally:
             api.close()
 
+    def test_price_in_another_currency(self):
+        api = MockApi(201, {"id": "cs2", "object": "checkout_session", "price": "25.00", "currency": "EUR", "amount_usd": None})
+        try:
+            spotex = SpotExPay("sk_test_abc", base_url=api.base_url)
+            session = spotex.checkout_sessions.create(price="25.00", currency="EUR", item="Gift box")
+            self.assertEqual(session["currency"], "EUR")
+            self.assertEqual(api.seen[0]["body"], {"price": "25.00", "currency": "EUR", "item": "Gift box"})
+            # Positional, as in 0.1: amount first, then item.
+            spotex.checkouts.create("10.00", "DOGE", "X")
+            self.assertEqual(api.seen[1]["body"], {"amount_usd": "10.00", "coin": "DOGE", "item": "X"})
+        finally:
+            api.close()
+
     def test_idempotency_key_made_for_posts_only(self):
         api = MockApi(200, {"data": []})
         try:

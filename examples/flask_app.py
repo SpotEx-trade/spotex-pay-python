@@ -18,9 +18,10 @@ app = Flask(__name__)
 
 @app.post("/orders/<order_id>/pay")
 def pay(order_id):
-    order = {"id": order_id, "total": "25.00", "name": "Gift box"}  # from your database
+    order = {"id": order_id, "total": "25.00", "currency": "USD", "name": "Gift box"}  # from your database
     session = spotex.checkout_sessions.create(
-        amount_usd=order["total"],
+        price=order["total"],
+        currency=order["currency"],
         item=order["name"],
         order_id=order["id"],
         return_url=f"https://yourshop.com/orders/{order['id']}/thanks",

@@ -9,7 +9,7 @@ from typing import Any, Dict, Optional
 from .errors import SpotExPayError
 
 DEFAULT_BASE_URL = "https://spotex.trade/api/merchant/v1"
-_VERSION = "0.1.1"
+_VERSION = "0.2.0"
 
 
 class SpotExPay:
@@ -17,7 +17,7 @@ class SpotExPay:
     amounts as decimal strings (use decimal.Decimal, never float, to add them).
 
         spotex = SpotExPay("sk_test_...")
-        session = spotex.checkout_sessions.create(amount_usd="25.00", item="Gift box",
+        session = spotex.checkout_sessions.create(price="25.00", currency="EUR", item="Gift box",
                                                   idempotency_key="order-1043")
     """
 
@@ -90,10 +90,15 @@ class _CheckoutSessions:
     def __init__(self, client: SpotExPay) -> None:
         self._c = client
 
-    def create(self, amount_usd: str, item: str, order_id: Optional[str] = None, return_url: Optional[str] = None,
-               expires_in_minutes: Optional[int] = None, idempotency_key: Optional[str] = None) -> Dict[str, Any]:
-        """One order paid on SpotEx's own page: send the buyer to the session's ``url``."""
-        body = {"amount_usd": amount_usd, "item": item, "order_id": order_id, "return_url": return_url, "expires_in_minutes": expires_in_minutes}
+    def create(self, amount_usd: Optional[str] = None, item: Optional[str] = None, order_id: Optional[str] = None,
+               return_url: Optional[str] = None, expires_in_minutes: Optional[int] = None, idempotency_key: Optional[str] = None,
+               *, price: Optional[str] = None, currency: Optional[str] = None) -> Dict[str, Any]:
+        """One order paid on SpotEx's own page: send the buyer to the session's ``url``.
+
+        Price it with ``price`` and ``currency`` ("EUR", "JPY"...), or ``amount_usd`` for dollars.
+        """
+        body = {"price": price, "currency": currency, "amount_usd": amount_usd, "item": item, "order_id": order_id,
+                "return_url": return_url, "expires_in_minutes": expires_in_minutes}
         return self._c._post("/checkout-sessions", body, idempotency_key)
 
     def retrieve(self, session_id: str) -> Dict[str, Any]:
@@ -104,10 +109,14 @@ class _Checkouts:
     def __init__(self, client: SpotExPay) -> None:
         self._c = client
 
-    def create(self, amount_usd: str, coin: str, item: str, order_id: Optional[str] = None,
-               idempotency_key: Optional[str] = None) -> Dict[str, Any]:
-        """An on-chain checkout with its own address and exact amount, to show in your own design."""
-        body = {"amount_usd": amount_usd, "coin": coin, "item": item, "order_id": order_id}
+    def create(self, amount_usd: Optional[str] = None, coin: Optional[str] = None, item: Optional[str] = None,
+               order_id: Optional[str] = None, idempotency_key: Optional[str] = None,
+               *, price: Optional[str] = None, currency: Optional[str] = None) -> Dict[str, Any]:
+        """An on-chain checkout with its own address and exact amount, to show in your own design.
+
+        Price it with ``price`` and ``currency``, or ``amount_usd`` for dollars.
+        """
+        body = {"price": price, "currency": currency, "amount_usd": amount_usd, "coin": coin, "item": item, "order_id": order_id}
         return self._c._post("/checkouts", body, idempotency_key)
 
     def retrieve(self, checkout_id: str) -> Dict[str, Any]:

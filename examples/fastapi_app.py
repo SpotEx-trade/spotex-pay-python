@@ -17,7 +17,8 @@ app = FastAPI()
 @app.post("/orders/{order_id}/pay")
 def pay(order_id: str):
     session = spotex.checkout_sessions.create(
-        amount_usd="25.00",
+        price="25.00",
+        currency="USD",
         item="Gift box",
         order_id=order_id,
         return_url=f"https://yourshop.com/orders/{order_id}/thanks",

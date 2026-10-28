@@ -34,7 +34,8 @@ from spotex_pay import SpotExPay
 spotex = SpotExPay(os.environ["SPOTEX_KEY"])
 
 session = spotex.checkout_sessions.create(
-    amount_usd="25.00",
+    price="25.00",
+    currency="EUR",  # or USD, GBP, JPY... any of https://spotex.trade/docs/merchant#currencies
     item="Gift box",
     order_id="1043",
     return_url="https://yourshop.com/thanks",  # must be on your merchant website
@@ -43,10 +44,12 @@ session = spotex.checkout_sessions.create(
 # redirect the buyer to session["url"]
 ```
 
+Your price becomes dollars at the exchange rate when the buyer opens the checkout. `amount_usd="25.00"` in place of `price` and `currency` still works, for a price in dollars.
+
 ## Or in your own design
 
 ```python
-checkout = spotex.checkouts.create(amount_usd="25.00", coin="DOGE", item="Gift box", order_id="1043")
+checkout = spotex.checkouts.create(price="25.00", currency="EUR", coin="DOGE", item="Gift box", order_id="1043")
 # show checkout["address"] and checkout["amount"], then wait for the webhook
 # or poll spotex.checkouts.retrieve(checkout["id"])
 ```
